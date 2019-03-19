@@ -16,10 +16,10 @@ struct Task {
     let isDone: Bool
 
     init(task: ListTask) {
-        id = task.id
-        name = task.name
-        note = task.note ?? ""
-        isDone = task.isDone
+        self.id = task.id
+        self.name = task.name
+        self.note = task.note ?? ""
+        self.isDone = task.isDone
     }
 
 }

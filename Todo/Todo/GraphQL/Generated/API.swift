@@ -198,6 +198,152 @@ public final class CreateTaskMutation: GraphQLMutation {
   }
 }
 
+public final class UpdateTaskStateMutation: GraphQLMutation {
+  public let operationDefinition =
+    "mutation UpdateTaskState($id: String!, $isDone: Boolean!) {\n  updateTaskStatus(id: $id, isDone: $isDone) {\n    __typename\n    ...ListTask\n  }\n}"
+
+  public var queryDocument: String { return operationDefinition.appending(ListTask.fragmentDefinition) }
+
+  public var id: String
+  public var isDone: Bool
+
+  public init(id: String, isDone: Bool) {
+    self.id = id
+    self.isDone = isDone
+  }
+
+  public var variables: GraphQLMap? {
+    return ["id": id, "isDone": isDone]
+  }
+
+  public struct Data: GraphQLSelectionSet {
+    public static let possibleTypes = ["Mutation"]
+
+    public static let selections: [GraphQLSelection] = [
+      GraphQLField("updateTaskStatus", arguments: ["id": GraphQLVariable("id"), "isDone": GraphQLVariable("isDone")], type: .object(UpdateTaskStatus.selections)),
+    ]
+
+    public private(set) var resultMap: ResultMap
+
+    public init(unsafeResultMap: ResultMap) {
+      self.resultMap = unsafeResultMap
+    }
+
+    public init(updateTaskStatus: UpdateTaskStatus? = nil) {
+      self.init(unsafeResultMap: ["__typename": "Mutation", "updateTaskStatus": updateTaskStatus.flatMap { (value: UpdateTaskStatus) -> ResultMap in value.resultMap }])
+    }
+
+    /// Updates value of the flag "isDone" for task identified by "id".
+    /// Returns Task after update.
+    public var updateTaskStatus: UpdateTaskStatus? {
+      get {
+        return (resultMap["updateTaskStatus"] as? ResultMap).flatMap { UpdateTaskStatus(unsafeResultMap: $0) }
+      }
+      set {
+        resultMap.updateValue(newValue?.resultMap, forKey: "updateTaskStatus")
+      }
+    }
+
+    public struct UpdateTaskStatus: GraphQLSelectionSet {
+      public static let possibleTypes = ["Task"]
+
+      public static let selections: [GraphQLSelection] = [
+        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+        GraphQLFragmentSpread(ListTask.self),
+      ]
+
+      public private(set) var resultMap: ResultMap
+
+      public init(unsafeResultMap: ResultMap) {
+        self.resultMap = unsafeResultMap
+      }
+
+      public init(id: String, name: String, note: String? = nil, isDone: Bool) {
+        self.init(unsafeResultMap: ["__typename": "Task", "id": id, "name": name, "note": note, "isDone": isDone])
+      }
+
+      public var __typename: String {
+        get {
+          return resultMap["__typename"]! as! String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "__typename")
+        }
+      }
+
+      public var fragments: Fragments {
+        get {
+          return Fragments(unsafeResultMap: resultMap)
+        }
+        set {
+          resultMap += newValue.resultMap
+        }
+      }
+
+      public struct Fragments {
+        public private(set) var resultMap: ResultMap
+
+        public init(unsafeResultMap: ResultMap) {
+          self.resultMap = unsafeResultMap
+        }
+
+        public var listTask: ListTask {
+          get {
+            return ListTask(unsafeResultMap: resultMap)
+          }
+          set {
+            resultMap += newValue.resultMap
+          }
+        }
+      }
+    }
+  }
+}
+
+public final class DeleteTaskMutation: GraphQLMutation {
+  public let operationDefinition =
+    "mutation DeleteTask($id: String!) {\n  deleteTask(id: $id)\n}"
+
+  public var id: String
+
+  public init(id: String) {
+    self.id = id
+  }
+
+  public var variables: GraphQLMap? {
+    return ["id": id]
+  }
+
+  public struct Data: GraphQLSelectionSet {
+    public static let possibleTypes = ["Mutation"]
+
+    public static let selections: [GraphQLSelection] = [
+      GraphQLField("deleteTask", arguments: ["id": GraphQLVariable("id")], type: .scalar(Bool.self)),
+    ]
+
+    public private(set) var resultMap: ResultMap
+
+    public init(unsafeResultMap: ResultMap) {
+      self.resultMap = unsafeResultMap
+    }
+
+    public init(deleteTask: Bool? = nil) {
+      self.init(unsafeResultMap: ["__typename": "Mutation", "deleteTask": deleteTask])
+    }
+
+    /// Deletes task identified by "id".
+    /// Returns true if the task was deleted. Returns false if there was no task for a given id.
+    public var deleteTask: Bool? {
+      get {
+        return resultMap["deleteTask"] as? Bool
+      }
+      set {
+        resultMap.updateValue(newValue, forKey: "deleteTask")
+      }
+    }
+  }
+}
+
 public struct ListTask: GraphQLFragment {
   public static let fragmentDefinition =
     "fragment ListTask on Task {\n  __typename\n  id\n  name\n  note\n  isDone\n}"

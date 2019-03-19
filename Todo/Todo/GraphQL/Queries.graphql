@@ -12,7 +12,17 @@ query AllTasks {
 }
 
 mutation CreateTask($name: String!, $note: String, $isDone: Boolean) {
-	createTask(name:$name, note: $note, isDone:$isDone) {
+	createTask(name: $name, note: $note, isDone: $isDone) {
 		...ListTask
 	}
+}
+
+mutation UpdateTaskState($id: String!, $isDone: Boolean!){
+    updateTaskStatus(id: $id, isDone: $isDone) {
+        ...ListTask
+    }
+}
+
+mutation DeleteTask($id: String!) {
+    deleteTask(id: $id)
 }
