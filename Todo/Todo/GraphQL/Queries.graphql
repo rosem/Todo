@@ -1,0 +1,18 @@
+fragment ListTask on Task {
+    id
+    name
+    note
+    isDone
+}
+
+query AllTasks {
+    allTasks {
+        ...ListTask
+    }
+}
+
+mutation CreateTask($name: String!, $note: String, $isDone: Boolean) {
+	createTask(name:$name, note: $note, isDone:$isDone) {
+		...ListTask
+	}
+}
