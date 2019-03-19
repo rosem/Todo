@@ -1,3 +1,3 @@
 # Todo
 
-Simple 'Todo' application using GraphQL and Apollo.
+Simple task application using GraphQL and Apollo.
