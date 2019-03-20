@@ -11,8 +11,10 @@ import Apollo
 
 class AllTasksViewController: UITableViewController {
 
-    let TodoIndex = 0
-    let DoneIndex = 1
+    enum Sections: Int {
+        case Todo = 0
+        case Done = 1
+    }
 
     let dataSource = AllTasksDataSource()
 
@@ -31,7 +33,7 @@ class AllTasksViewController: UITableViewController {
     }
 
     func sectionForTask(task: Task) -> Int {
-        return task.isDone ? 1 : 0
+        return task.isDone ? Sections.Done.rawValue : Sections.Todo.rawValue
     }
 
     @IBAction func didCreate() {
@@ -61,10 +63,9 @@ extension AllTasksViewController {
         Apollo.shared.client.fetch(query: query) { [unowned self] results, error in
             if let listTasks = results?.data?.allTasks?.compactMap({$0}) {
                 let tasks = listTasks.map({Task(task: $0.fragments.listTask)})
-                let sections: [ListSection] = [
-                    ListSection(title: "Today", tasks: tasks.filter { $0.isDone == false }),
-                    ListSection(title: "Done", tasks: tasks.filter { $0.isDone == true })
-                ]
+                var sections: [ListSection] = []
+                sections.insert(ListSection(title: "Today", tasks: tasks.filter { $0.isDone == false }), at: Sections.Todo.rawValue)
+                sections.insert(ListSection(title: "Done", tasks: tasks.filter { $0.isDone == true }), at: Sections.Done.rawValue)
                 self.dataSource.sections = sections
                 self.tableView.reloadData()
 
@@ -82,7 +83,7 @@ extension AllTasksViewController {
             if let listTask = results?.data?.updateTaskStatus?.fragments.listTask {
                 let updatedTask = Task(task: listTask)
                 let section = self.sectionForTask(task: updatedTask)
-                let row = section == self.TodoIndex ? 0 : self.dataSource.sections[section].tasks.count
+                let row = section == Sections.Todo.rawValue ? 0 : self.dataSource.sections[section].tasks.count
                 let destinationIndexPath = IndexPath(row: row, section: section)
 
                 self.dataSource.updatedTask(updatedTask: updatedTask, movedFrom: sourceIndexPath, to: destinationIndexPath)
